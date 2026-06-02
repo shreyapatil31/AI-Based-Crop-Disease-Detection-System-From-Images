@@ -78,7 +78,7 @@ CropCare AI is an AI-powered web application for detecting sugarcane diseases fr
 
 
 
-!\[Language Support](Screenshots/laguage.png)
+!\[Language Support](Screenshots/language.png)
 
 
 
