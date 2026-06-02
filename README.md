@@ -1,84 +1,141 @@
-\# CropCare AI - Crop Disease Detection Website
+# CropCare AI - AI Based Crop Disease Detection System
 
+## Overview
 
+CropCare AI is a Flask-based web application that uses Deep Learning to detect sugarcane leaf diseases from uploaded or camera-captured images. The system predicts the disease, displays confidence scores, and provides treatment recommendations to farmers.
 
-\## Project Overview
+## Features
 
+* Sugarcane Disease Detection using Deep Learning
+* Image Upload Support
+* Camera Capture Support
+* Disease Prediction with Accuracy Score
+* Treatment and Prevention Recommendations
+* User Login and Registration
+* Dashboard Analytics
+* Prediction History Storage
+* Multilingual Support (English, Hindi, Marathi)
+* Responsive User Interface
 
+## Technologies Used
 
-CropCare AI is an AI-powered web application for detecting sugarcane diseases from leaf images using Deep Learning.
+### Frontend
 
+* HTML
+* CSS
+* JavaScript
 
+### Backend
 
-\## Technologies Used
+* Flask (Python)
 
+### Machine Learning
 
+* TensorFlow
+* Keras
+* OpenCV
+* NumPy
+* Pillow
 
-\* Flask
+### Database
 
-\* TensorFlow / Keras
+* SQLite
 
-\* OpenCV
+## Diseases Detected
 
-\* SQLite
+* Healthy
+* Mosaic
+* Red Rot
+* Rust
+* Yellow Leaf Disease
+* Brown Rust
+* Brown Spot
+* Grassy Shoot
+* Banded Chlorosis
 
-\* HTML, CSS, JavaScript
+## Project Structure
 
+```text
+crop-disease-website/
+│
+├── app.py
+├── train_model.py
+├── model.h5
+├── cropcare.db
+├── requirements.txt
+│
+├── static/
+│   ├── bg.jpg
+│   └── uploads/
+│
+├── templates/
+│   ├── index.html
+│   ├── login.html
+│   └── register.html
+│
+├── Screenshots/
+│   ├── login.png
+│   ├── home.png
+│   └── dashboard.png
+│
+└── README.md
+```
 
+## Screenshots
 
-\## Features
+### Login Page
 
+![Login Page](Screenshots/login.png)
 
+### Home Page
 
-\* Disease Detection
+![Home Page](Screenshots/home.png)
 
-\* Camera Capture
+### Dashboard
 
-\* Image Upload
+![Dashboard](Screenshots/dashboard.png)
 
-\* Dashboard Analytics
+## Installation
 
-\* Multilingual Support (English, Hindi, Marathi)
+### Clone Repository
 
-\* Treatment Recommendations
+```bash
+git clone https://github.com/shreyapatil31/AI-Based-Crop-Disease-Detection-System-From-Images.git
+cd AI-Based-Crop-Disease-Detection-System-From-Images
+```
 
-\* Prediction History
+### Install Dependencies
 
+```bash
+pip install -r requirements.txt
+```
 
+### Run Application
 
-\## Screenshots
+```bash
+python app.py
+```
 
+Open:
 
+```text
+http://127.0.0.1:5000
+```
 
-\### Login Page
+## Future Enhancements
 
+* Vision Transformer (ViT) Based Disease Detection
+* Disease Severity Estimation
+* Explainable AI (Grad-CAM)
+* Weather-Based Disease Alerts
+* Mobile Application Support
+* Early Disease Prediction
 
+## Author
 
-!\[Login Page](Screenshots/login.png)
+**Shreya Patil**
+Artificial Intelligence and Data Science Engineering
 
+## License
 
-
-\### Home Page
-
-
-
-!\[Home Page](Screenshots/home.png)
-
-
-
-\### Dashboard
-
-
-
-!\[Dashboard](Screenshots/dashboard.png)
-
-
-
-\### Language Support
-
-
-
-!\[Language Support](Screenshots/language.png)
-
-
-
+This project is developed for academic and educational purposes.
