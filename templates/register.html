@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - CropCare AI</title>
+
+    <style>
+        body {
+            background: #0b3d1f;
+            font-family: Arial;
+        }
+
+        .phone-box {
+            display: flex;
+            width: 90%;
+            margin: 8px auto;
+            gap: 5px;
+        }
+
+        .phone-box select {
+            width: 35%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .phone-box input {
+            width: 65%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+
+        small {
+            display: block;
+            width: 90%;
+            margin: auto;
+            text-align: left;
+            color: red;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body style="background:#0b3d1f; font-family:Arial;">
+
+<div style="
+    width:400px;
+    margin:60px auto;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+">
+
+    <h2>🌿 Create Account</h2>
+
+    <form method="POST">
+
+        <input type="text" name="name" placeholder="Full Name" required
+               style="width:90%; padding:12px; margin:8px;">
+
+        <div class="phone-box">
+            <select name="country_code" required>
+                   <option value="+91">🇮🇳 +91</option>
+                   <option value="+1">🇺🇸 +1</option>
+                   <option value="+44">🇬🇧 +44</option>
+                   <option value="+61">🇦🇺 +61</option>
+                   <option value="+971">🇦🇪 +971</option>
+            </select>
+
+        <input type="text"
+               name="mobile"
+               placeholder="Mobile Number"
+               maxlength="10"
+               pattern="[0-9]{10}"
+               title="Mobile number must contain exactly 10 digits"
+               required>
+        </div>
+
+        <input type="date" name="dob" required
+               style="width:90%; padding:12px; margin:8px;">
+
+        <input type="text" name="username" placeholder="Username" required
+               style="width:90%; padding:12px; margin:8px;">
+
+        <input type="password"
+               name="password"
+               id="password"
+               placeholder="Password"
+               required
+               onkeyup="checkPassword()"
+               style="width:90%; padding:12px; margin:8px; border:1px solid #ccc; border-radius:10px; font-size:16px;">
+
+        <small id="passwordMsg" style="color:red; display:block;"></small>
+
+        <input type="password"
+               name="confirm_password"
+               id="confirm_password"
+               placeholder="Confirm Password"
+               required
+               onkeyup="checkConfirmPassword()"
+               style="width:90%; padding:12px; margin:8px; border:1px solid #ccc; border-radius:10px; font-size:16px;">
+
+        <small id="confirmMsg" style="color:red; display:block;"></small>
+
+        <button type="submit" style="
+            padding:12px 30px;
+            background:#ffcc00;
+            border:none;
+            border-radius:20px;
+            font-weight:bold;
+            cursor:pointer;
+            margin-top:10px;">
+            Register
+        </button>
+
+    </form>
+
+    {% if error %}
+    <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <p>
+        Already have account?
+        <a href="/login">Login here</a>
+    </p>
+
+</div>
+<script>
+function checkPassword() {
+    let password = document.getElementById("password").value;
+    let msg = document.getElementById("passwordMsg");
+
+    let pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_])[A-Za-z\d@$!%*?&.#_]{6,}$/;
+
+    if (!pattern.test(password)) {
+        msg.innerHTML = "Password must contain one capital letter, one digit and one special character.";
+    } else {
+        msg.innerHTML = "";
+    }
+}
+
+function checkConfirmPassword() {
+    let password = document.getElementById("password").value;
+    let confirmPassword = document.getElementById("confirm_password").value;
+    let msg = document.getElementById("confirmMsg");
+
+    if (password !== confirmPassword) {
+        msg.innerHTML = "Password and Confirm Password do not match.";
+    } else {
+        msg.innerHTML = "";
+    }
+}
+</script>
+</body>
+</html>

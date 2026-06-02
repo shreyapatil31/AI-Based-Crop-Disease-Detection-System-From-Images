@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CropCare AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: #eaf7ea;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #0b3d1f;
+            color: white;
+            padding: 25px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffcc00;
+        }
+
+        .sidebar button,
+        .sidebar select,
+        .sidebar a button {
+            width: 100%;
+            padding: 13px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            color: #0b3d1f;
+            margin-bottom: 10px;
+        }
+
+        input[type="file"] {
+            margin: 15px 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #0b3d1f;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 8px;
+        }
+
+        img.preview {
+            width: 300px;
+            margin-top: 20px;
+            border-radius: 15px;
+        }
+
+        video {
+            width: 300px;
+            border-radius: 15px;
+            background: black;
+            margin-top: 15px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .result-box {
+            background: #f3fff3;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #cce5cc;
+        }
+
+        .result-box h3 {
+            color: #0b3d1f;
+            margin-bottom: 10px;
+        }
+
+        .wide {
+            grid-column: span 2;
+        }
+
+        #dashboard {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: #0b3d1f;
+            color: white;
+        }
+
+        .history-img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .error-box {
+            margin-top: 25px;
+            background: #fff3cd;
+            border: 2px solid #ffcc00;
+            padding: 20px;
+            border-radius: 15px;
+            color: #8a5a00;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .wide {
+                grid-column: span 1;
+            }
+
+            img.preview,
+            video {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>🌿 CropCare AI</h2>
+
+    <button id="homeBtn" onclick="showHome()">🏠 Home</button>
+    <button id="dashboardBtn" onclick="showDashboard()">📊 Dashboard</button>
+
+    <select id="language" onchange="changeLanguage()">
+        <option value="en">English</option>
+        <option value="mr">मराठी</option>
+        <option value="hi">हिंदी</option>
+    </select>
+
+    <a href="/">
+        <button id="resetBtn" type="button">🔄 Reset</button>
+    </a>
+
+    <a href="/logout">
+        <button id="logoutBtn" type="button">🚪 Logout</button>
+    </a>
+</div>
+
+<div class="main">
+
+    <div style="text-align:right; margin-bottom:15px; font-size:18px; font-weight:bold; color:#0b3d1f;">
+        Welcome, {{ session['user'] }} 👋
+    </div>
+
+    <div id="home">
+        <div class="card">
+            <h1 id="title">Crop Disease Detection</h1>
+
+            <p id="subtitle">
+                Upload crop image or use camera to detect disease, treatment and medicine.
+            </p>
+
+            {% if not info and not error_message %}
+            <form method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" required>
+                <br>
+                <button class="btn" type="submit" id="detectBtn">Detect Disease</button>
+            </form>
+
+            <h2 id="cameraTitle" style="margin-top:30px;">📷 Camera Detection</h2>
+
+            <video id="camera" autoplay></video>
+            <br>
+
+            <button class="btn" type="button" id="startCameraBtn" onclick="startCamera()">Start Camera</button>
+            <button class="btn" type="button" id="captureBtn" onclick="captureImage()">Capture & Detect</button>
+            {% endif %}
+
+            <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+            <form id="cameraForm" method="POST" action="/camera">
+                <input type="hidden" name="camera_image" id="camera_image">
+            </form>
+
+            {% if image_path %}
+                <h2 id="uploadTitle" style="margin-top:25px;">Uploaded Image</h2>
+                <img src="{{ image_path }}" class="preview">
+            {% endif %}
+
+            {% if error_message %}
+                <div class="error-box">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+
+            {% if info %}
+            <div class="result-grid">
+
+                <div class="result-box">
+                    <h3 id="cropText">Crop Name</h3>
+                    <p data-en="{{ info.en.crop }}"
+                       data-mr="{{ info.mr.crop }}"
+                       data-hi="{{ info.hi.crop }}">
+                       {{ info.en.crop }}
+                    </p>
+                </div>
+
+                <div class="result-box">
+                    <h3 id="diseaseText">Disease Name</h3>
+                    <p data-en="{{ info.en.disease }}"
+                       data-mr="{{ info.mr.disease }}"
+                       data-hi="{{ info.hi.disease }}">
+                       {{ info.en.disease }}
+                    </p>
+                </div>
+
+                <div class="result-box">
+                    <h3 id="growthText">Growth Stage</h3>
+                    <p data-en="{{ growth_stage }}"
+                       data-mr="{% if growth_stage == 'Vegetative Stage' %}वनस्पती वाढ टप्पा{% elif growth_stage == 'Maturity Stage' %}परिपक्वता टप्पा{% else %}अज्ञात{% endif %}"
+                       data-hi="{% if growth_stage == 'Vegetative Stage' %}वनस्पति वृद्धि अवस्था{% elif growth_stage == 'Maturity Stage' %}परिपक्व अवस्था{% else %}अज्ञात{% endif %}">
+                       {{ growth_stage }}
+                    </p>
+                </div>
+
+                <div class="result-box">
+                    <h3 id="severityText">Severity</h3>
+                    <p data-en="{{ severity }} ({{ severity_percent }}%)"
+                       data-mr="{% if severity == 'Mild' %}सौम्य{% elif severity == 'Moderate' %}मध्यम{% elif severity == 'Severe' %}तीव्र{% else %}अज्ञात{% endif %} ({{ severity_percent }}%)"
+                       data-hi="{% if severity == 'Mild' %}हल्का{% elif severity == 'Moderate' %}मध्यम{% elif severity == 'Severe' %}गंभीर{% else %}अज्ञात{% endif %} ({{ severity_percent }}%)">
+                       {{ severity }} ({{ severity_percent }}%)
+                    </p>
+                </div>
+
+                <div class="result-box wide">
+                    <h3 id="climateText">Climate-Aware Disease Risk</h3>
+                    <p data-en="{{ climate_alert.en }}"
+                       data-mr="{{ climate_alert.mr }}"
+                       data-hi="{{ climate_alert.hi }}">
+                       {{ climate_alert.en }}
+                    </p>
+                </div>
+
+                <div class="result-box wide">
+                    <h3 id="treatmentText">Treatment</h3>
+                    <p data-en="{{ info.en.treatment }}"
+                       data-mr="{{ info.mr.treatment }}"
+                       data-hi="{{ info.hi.treatment }}">
+                       {{ info.en.treatment }}
+                    </p>
+                </div>
+
+                <div class="result-box wide">
+                    <h3 id="medicineText">Medicine Recommendation</h3>
+                    <p data-en="{{ info.en.medicine }}"
+                       data-mr="{{ info.mr.medicine }}"
+                       data-hi="{{ info.hi.medicine }}">
+                       {{ info.en.medicine }}
+                    </p>
+                </div>
+
+                <div class="result-box wide">
+                    <h3 id="summaryText">Summary</h3>
+                    <p data-en="{{ info.en.disease }} detected. Recommended medicine: {{ info.en.medicine }}"
+                       data-mr="{{ info.mr.disease }} आढळला. शिफारस केलेले औषध: {{ info.mr.medicine }}"
+                       data-hi="{{ info.hi.disease }} पाया गया। सुझाई गई दवा: {{ info.hi.medicine }}">
+                       {{ info.en.disease }} detected. Recommended medicine: {{ info.en.medicine }}
+                    </p>
+                </div>
+
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <div class="card">
+            <h1 id="dashboardTitle">📊 Dashboard</h1>
+
+            <h2 id="historyTitle">Detection History</h2>
+
+            <table>
+                <tr>
+                    <th id="imageHead">Image</th>
+                    <th id="diseaseHead">Disease</th>
+                    <th id="medicineHead">Medicine</th>
+                    <th id="summaryHead">Summary</th>
+                </tr>
+
+                {% for item in detection_history %}
+                <tr>
+                    <td>
+                        <img src="{{ url_for('static', filename='uploads/' + item.file) }}"
+                             class="history-img">
+                    </td>
+
+                    <td data-en="{{ item.disease_en }}"
+                        data-mr="{{ item.disease_mr }}"
+                        data-hi="{{ item.disease_hi }}">
+                        {{ item.disease_en }}
+                    </td>
+
+                    <td data-en="{{ item.medicine_en }}"
+                        data-mr="{{ item.medicine_mr }}"
+                        data-hi="{{ item.medicine_hi }}">
+                        {{ item.medicine_en }}
+                    </td>
+
+                    <td data-en="{{ item.summary_en }}"
+                        data-mr="{{ item.summary_mr }}"
+                        data-hi="{{ item.summary_hi }}">
+                        {{ item.summary_en }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function showDashboard() {
+    document.getElementById("home").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+}
+
+function showHome() {
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("home").style.display = "block";
+}
+
+function startCamera() {
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function(stream) {
+        document.getElementById("camera").srcObject = stream;
+    })
+    .catch(function() {
+        alert("Camera access denied or not available");
+    });
+}
+
+function captureImage() {
+    let video = document.getElementById("camera");
+    let canvas = document.getElementById("canvas");
+    let context = canvas.getContext("2d");
+
+    context.drawImage(video, 0, 0, 640, 480);
+    document.getElementById("camera_image").value = canvas.toDataURL("image/jpeg");
+    document.getElementById("cameraForm").submit();
+}
+
+const uiText = {
+    en: {
+        homeBtn: "🏠 Home",
+        dashboardBtn: "📊 Dashboard",
+        resetBtn: "🔄 Reset",
+        logoutBtn: "🚪 Logout",
+        title: "Crop Disease Detection",
+        subtitle: "Upload crop image or use camera to detect disease, treatment and medicine.",
+        detectBtn: "Detect Disease",
+        cameraTitle: "📷 Camera Detection",
+        startCameraBtn: "Start Camera",
+        captureBtn: "Capture & Detect",
+        uploadTitle: "Uploaded Image",
+        dashboardTitle: "📊 Dashboard",
+        historyTitle: "Detection History",
+        imageHead: "Image",
+        diseaseHead: "Disease",
+        medicineHead: "Medicine",
+        summaryHead: "Summary",
+        cropText: "Crop Name",
+        diseaseText: "Disease Name",
+        treatmentText: "Treatment",
+        medicineText: "Medicine Recommendation",
+        summaryText: "Summary",
+        growthText: "Growth Stage",
+        severityText: "Severity",
+        climateText: "Climate-Aware Disease Risk"
+    },
+    mr: {
+        homeBtn: "🏠 मुख्यपृष्ठ",
+        dashboardBtn: "📊 डॅशबोर्ड",
+        resetBtn: "🔄 रीसेट",
+        logoutBtn: "🚪 लॉगआउट",
+        title: "पिक रोग ओळख प्रणाली",
+        subtitle: "रोग, उपचार आणि औषध शोधण्यासाठी पिकाचा फोटो अपलोड करा किंवा कॅमेरा वापरा.",
+        detectBtn: "रोग ओळखा",
+        cameraTitle: "📷 कॅमेरा ओळख",
+        startCameraBtn: "कॅमेरा सुरू करा",
+        captureBtn: "फोटो काढा आणि ओळखा",
+        uploadTitle: "अपलोड केलेला फोटो",
+        dashboardTitle: "📊 डॅशबोर्ड",
+        historyTitle: "ओळख इतिहास",
+        imageHead: "फोटो",
+        diseaseHead: "रोग",
+        medicineHead: "औषध",
+        summaryHead: "सारांश",
+        cropText: "पिकाचे नाव",
+        diseaseText: "रोगाचे नाव",
+        treatmentText: "उपचार",
+        medicineText: "औषध शिफारस",
+        summaryText: "सारांश",
+        growthText: "वाढीचा टप्पा",
+        severityText: "तीव्रता",
+        climateText: "हवामानावर आधारित रोगाचा धोका"
+    },
+    hi: {
+        homeBtn: "🏠 होम",
+        dashboardBtn: "📊 डैशबोर्ड",
+        resetBtn: "🔄 रीसेट",
+        logoutBtn: "🚪 लॉगआउट",
+        title: "फसल रोग पहचान प्रणाली",
+        subtitle: "रोग, उपचार और दवा जानने के लिए फसल की फोटो अपलोड करें या कैमरा उपयोग करें.",
+        detectBtn: "रोग पहचानें",
+        cameraTitle: "📷 कैमरा पहचान",
+        startCameraBtn: "कैमरा शुरू करें",
+        captureBtn: "फोटो लें और पहचानें",
+        uploadTitle: "अपलोड की गई फोटो",
+        dashboardTitle: "📊 डैशबोर्ड",
+        historyTitle: "पहचान इतिहास",
+        imageHead: "फोटो",
+        diseaseHead: "रोग",
+        medicineHead: "दवा",
+        summaryHead: "सारांश",
+        cropText: "फसल का नाम",
+        diseaseText: "रोग का नाम",
+        treatmentText: "उपचार",
+        medicineText: "दवा की सिफारिश",
+        summaryText: "सारांश",
+        growthText: "विकास अवस्था",
+        severityText: "गंभीरता",
+        climateText: "जलवायु आधारित रोग जोखिम"
+    }
+};
+
+function changeLanguage() {
+    let lang = document.getElementById("language").value;
+    localStorage.setItem("selectedLang", lang);
+
+    for (let key in uiText[lang]) {
+        let el = document.getElementById(key);
+        if (el) {
+            el.innerText = uiText[lang][key];
+        }
+    }
+
+    document.querySelectorAll("[data-en]").forEach(function(el) {
+        let translated = el.getAttribute("data-" + lang);
+        if (translated) {
+            el.innerText = translated;
+        }
+    });
+}
+
+window.onload = function() {
+    let savedLang = localStorage.getItem("selectedLang") || "en";
+    document.getElementById("language").value = savedLang;
+    changeLanguage();
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+dataset/
+cropcare.db
+__pycache__/
+*.pyc
